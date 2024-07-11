@@ -40,14 +40,30 @@
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navigation" aria-controls="navigation" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
+                <!-- Abstracts
+                Registration
+                Feedback
+                Photo Gallery
+                Correspondent -->
 
                 <div id="navigation" class="navbar-collapse collapse  justify-content-lg-end me-lg-3">
                     <ul class="nav navbar-nav">
-                        <!-- Abstracts
-                        Registration
-                        Feedback
-                        Photo Gallery
-                        Correspondent -->
+
+
+                                <!-- Dropdown menu -->
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownRepository" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        Repository
+                                    </a>
+                                    <div class="dropdown-menu" aria-labelledby="navbarDropdownRepository" >
+                                        <a class="dropdown-item" href="#abstract-section" style="color: blue; text-decoration: none;">Abstracts</a>
+                                        <a class="dropdown-item" href="#sops-section" style="color: blue; text-decoration: none;">SOPs</a>
+                                        <a class="dropdown-item" href="#publications-section" style="color: blue; text-decoration: none;">Publications</a>
+                                    </div>
+
+                                </li>
+
+
 
                         <li class="nav-item"><a class="nav-link scrollto" href="#about-section">Registration</a></li>
                         <!-- <li class="nav-item"><a class="nav-link scrollto" href="#speakers-section">Abstracts</a></li> -->
@@ -55,7 +71,9 @@
                         <!-- <li class="nav-item"><a class="nav-link scrollto" href="#tickets-section">Tickets</a></li> -->
                         <li class="nav-item"><a class="nav-link scrollto" href="#venue-section">Photo Gallery</a></li>
                         <li class="nav-item"><a class="nav-link scrollto" href="#sponsors-section">Correspondent</a></li>
+                        <li class="nav-item"><a class="nav-link scrollto" href="#feedback-section">Feedback</a></li>
                     </ul><!--//nav-->
+
                 </div><!--//navabr-collapse-->
 
             </nav><!--//main-nav-->
@@ -79,7 +97,7 @@
     <div class="container">
         <div class="hero-text-block">
             <h1 class="hero-heading mb-2">USAID AMPATH Uzima Program Best Practice Forum 2024</h1>
-            <div class="hero-meta mb-3"><i class="far fa-calendar-alt me-2"></i>16 - 17 July <i class="fas fa-map-marker-alt mx-2"></i>The Nobel Hotel, Eldoret</div>
+            <div class="hero-meta mb-3"><i class="far fa-calendar-alt me-2"></i>16 - 17 July <i class="fas fa-map-marker-alt mx-2"></i>The Noble Hotel, Eldoret</div>
 
             <div class="hero-intro mb-4">Leveraging on Innovations to Improve Program Outcomes.</div>
 
@@ -118,6 +136,130 @@
         </div>
     </div><!--//container-->
 </div><!--//stats-block-->
+
+<section id="abstract-section" class="abstract-section section theme-bg-light">
+    <div class="container">
+        <h3 class="section-heading text-center mb-3">Abstract Submission</h3>
+        <div class="benefits-list text-center mb-3">
+            <section class="py-0">
+                <div class="bg-holder" style="background-image:url(assets/img/bg/bg-24.png);background-position:center;background-size:auto;"></div>
+                <!--/.bg-holder-->
+                <div class="container-lg position-relative">
+                    <div class="row flex-center">
+                        <div class="col-12 col-xl-12 order-1 order-xl-0">
+                            <div class="mb-9">
+                                <div class="p-4 code-to-copy" style="background-color: #87CEEB;">
+                                    <form class="row g-3" id="abstractForm">
+                                        <div class="col-md-12">
+                                            <label class="form-label" for="fullname">Full Name</label>
+                                            <input class="form-control" id="fullname" type="text" name="fullname" required>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <label class="form-label" for="abstract-title">Abstract Title</label>
+                                            <input class="form-control" id="abstract-title" type="text" name="abstract-title" required>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <label class="form-label" for="abstract">Abstract</label>
+                                            <textarea class="form-control" id="abstract" name="abstract" rows="4" required></textarea>
+                                        </div>
+                                        <div class="col-12">
+                                            <button class="btn btn-primary" type="submit">Submit</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div><!--//benefits-list-->
+    </div><!--//container-->
+</section><!--//abstract-section-->
+
+<section id="sops-section" class="sops-section section theme-bg-light">
+    <div class="container">
+        <h3 class="section-heading text-center mb-3">Standard Operating Procedures (SOPs) Submission</h3>
+        <div class="benefits-list text-center mb-3">
+            <section class="py-0">
+                <div class="bg-holder" style="background-image:url(assets/img/bg/bg-24.png);background-position:center;background-size:auto;"></div>
+                <!--/.bg-holder-->
+                <div class="container-lg position-relative">
+                    <div class="row flex-center">
+                        <div class="col-12 col-xl-12 order-1 order-xl-0">
+                            <div class="mb-9">
+                                <div class="p-4 code-to-copy" style="background-color: #87CEEB;">
+                                    <form class="row g-3" id="sopsForm">
+                                        <div class="col-md-12">
+                                            <label class="form-label" for="fullname">Full Name</label>
+                                            <input class="form-control" id="fullname" type="text" name="fullname" required>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <label class="form-label" for="sop-title">SOP Title</label>
+                                            <input class="form-control" id="sop-title" type="text" name="sop-title" required>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <label class="form-label" for="sop">SOP</label>
+                                            <textarea class="form-control" id="sop" name="sop" rows="4" required></textarea>
+                                        </div>
+                                        <div class="col-12">
+                                            <button class="btn btn-primary" type="submit">Submit</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div><!--//benefits-list-->
+    </div><!--//container-->
+</section><!--//sops-section-->
+
+
+
+<section id="publications-section" class="publications-section section theme-bg-light">
+    <div class="container">
+        <h3 class="section-heading text-center mb-3">Publications Submission</h3>
+        <div class="benefits-list text-center mb-3">
+            <section class="py-0">
+                <div class="bg-holder" style="background-image:url(assets/img/bg/bg-24.png);background-position:center;background-size:auto;"></div>
+                <!--/.bg-holder-->
+                <div class="container-lg position-relative">
+                    <div class="row flex-center">
+                        <div class="col-12 col-xl-12 order-1 order-xl-0">
+                            <div class="mb-9">
+                                <div class="p-4 code-to-copy" style="background-color: #87CEEB;">
+                                    <form class="row g-3" id="publicationsForm">
+                                        <div class="col-md-12">
+                                            <label class="form-label" for="fullname">Full Name</label>
+                                            <input class="form-control" id="fullname" type="text" name="fullname" required>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <label class="form-label" for="publication-title">Publication Title</label>
+                                            <input class="form-control" id="publication-title" type="text" name="publication-title" required>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <label class="form-label" for="publication">Publication</label>
+                                            <textarea class="form-control" id="publication" name="publication" rows="4" required></textarea>
+                                        </div>
+                                        <div class="col-12">
+                                            <button class="btn btn-primary" type="submit">Submit</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div><!--//benefits-list-->
+    </div><!--//container-->
+</section><!--//publications-section-->
+
+
+
+
+
 
 <section id="about-section" class="about-section section theme-bg-light">
     <div class="container">
@@ -220,6 +362,21 @@
         </div><!--//container-->
     </div><!--//media-block-->
 </section><!--//about-section-->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 <!-- <section id="speakers-section" class="speakers-section section">
     <div class="container">
@@ -787,6 +944,46 @@
     </div><!--//container-->
 </section><!--//sponsors-section-->
 
+
+
+
+
+<!--//feedback-section-->
+<section id="feedback-section" class="feedback-section section theme-bg-light">
+    <div class="container">
+        <h3 class="section-heading text-center mb-3">Feedback</h3>
+        <div class="benefits-list text-center mb-3">
+            <section class="py-0">
+                <div class="bg-holder" style="background-image:url(assets/img/bg/bg-24.png);background-position:center;background-size:auto;"></div>
+                <!--/.bg-holder-->
+                <div class="container-lg position-relative">
+                    <div class="row flex-center">
+                        <div class="col-12 col-xl-12 order-1 order-xl-0">
+                            <div class="mb-9">
+                                <div class="p-4 code-to-copy" style="background-color: #87CEEB;">
+                                    <form class="row g-3" id="feedbackForm">
+                                        <div class="col-md-12">
+                                            <label class="form-label" for="fullname">Full Name</label>
+                                            <input class="form-control" id="fullname" type="text" name="fullname" required>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <label class="form-label" for="feedback">Your Feedback</label>
+                                            <textarea class="form-control" id="feedback" name="feedback" rows="4" required></textarea>
+                                        </div>
+                                        <div class="col-12">
+                                            <button class="btn btn-primary" type="submit">Submit</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div><!--//benefits-list-->
+    </div><!--//container-->
+</section><!--//feedback-section-->
+
 <footer class="footer py-5 theme-bg-primary">
     <div class="container text-center">
 
@@ -820,6 +1017,19 @@
 <script th:src="@{/conference/assets/plugins/smoothscroll.min.js}"></script>
 <script th:src="@{/conference/assets/plugins/gumshoe/gumshoe.polyfills.min.js}"></script>
 <script th:src="@{/conference/assets/js/main.js}"></script>
+
+
+
+
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+
+<!-- Popper.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.1/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJfOBbqhLdjZrAvcEZ3XZ9/2Fmgh/5+1CIp2I/qJiM9nVr" crossorigin="anonymous"></script>
+
+<!-- Bootstrap JS -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+
 
 </body>
 </html>
