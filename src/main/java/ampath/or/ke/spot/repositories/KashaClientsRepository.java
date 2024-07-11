@@ -19,5 +19,6 @@ public interface KashaClientsRepository extends JpaRepository<KashaClients, Long
     List<KashaClients> findByEligible(int eligible);
 
     Page<KashaClients> findByEligibleAndConsented(int eligible,int consented,Pageable pageable);
+    List<KashaClients> findByEligibleAndConsentedAndSyncedToPendulum(int eligible,int consented, int syncedToPendulum);
 
 }

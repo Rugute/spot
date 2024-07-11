@@ -32,7 +32,6 @@ public class PendullumData {
     @Column(name = "encounter_Date")
     private String encounterDate;
 
-
     @Column(name = "height")
     private String height;
 
@@ -84,6 +83,9 @@ public class PendullumData {
 
     @Column(name = "Cotrimoxazole_Use")
     private String Cotrimoxazole_Use;
+
+    @Column(name = "created_on")
+    private Date dateCreated;
 
 
 
@@ -264,5 +266,11 @@ public class PendullumData {
         Cotrimoxazole_Use = cotrimoxazole_Use;
     }
 
+    public Date getDateCreated() {
+        return dateCreated;
+    }
 
+    public void setDateCreated(Date dateCreated) {
+        this.dateCreated = dateCreated;
+    }
 }

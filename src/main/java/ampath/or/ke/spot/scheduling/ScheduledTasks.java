@@ -806,4 +806,179 @@ public class ScheduledTasks {
         }
         return conceptValue;
     }
+
+    //Share live Data to Pendulum
+    //@Scheduled(cron = "0 0,59 * * * *") // 30 minutes
+    //@Scheduled(cron = "0 */1 * ? * *") // 1 minutes
+
+    public void UpdatePendulumFromKashaClients() throws JSONException, ParseException, SQLException, IOException {
+        // HttpSession session= new HttpSession()
+        List<KashaClients> kashaClientsList = kashaClientsServices.getNoSyncedToPendulum(1, 1, 0);
+        int x = kashaClientsList.size();
+        System.out.println("System Loaded Kasha " + x);
+        //KashaClients
+        ;
+        for (int j = 0; j < x; j++) {
+
+            int personId = kashaClientsList.get(j).getPerson_id();
+            Date nowDate = new Date();
+            Connection con = DriverManager.getConnection(etl_server, etl_username, etl_password);
+            Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            ResultSet rs = stmt.executeQuery("SELECT \n" +
+                    "    TO_BASE64(MD5(b.person_id)) patient_identifier,\n" +
+                    "    b.person_id,\n" +
+                    "    pp.gender,\n" +
+                    "    pp.birthdate,\n" +
+                    "    b.encounter_datetime Encounter_Date,\n" +
+                    "    height,\n" +
+                    "    weight,\n" +
+                    "    rtc_date Next_clinical_appointment,\n" +
+                    "    hiv_start_date Diagnosis_Date,\n" +
+                    "    on_tb_tx Tuberculosis_Treatment_Plan,\n" +
+                    "    cur_who_stage Current_WHO_HIV_Stage,\n" +
+                    "    cur_arv_meds,\n" +
+                    "    med_pickup_rtc_date,\n" +
+                    "    cd4_resulted CD4_Count,\n" +
+                    "    is_clinical_encounter Is_ART,\n" +
+                    "    is_pregnant Is_PMTCT,\n" +
+                    "    vl_resulted Viral_Load,\n" +
+                    "    cur_arv_adherence Adherence,\n" +
+                    "    y.education_level Education_Level,\n" +
+                    "    CASE\n" +
+                    "        WHEN x.person_id IS NOT NULL THEN 1\n" +
+                    "        ELSE 0\n" +
+                    "    END Screening_For_STI,\n" +
+                    "    NULL Classification_Of_Malnutrition,\n" +
+                    "    on_ipt Isoniazid_Use,\n" +
+                    "    pcp_prophylaxis_start_date Cotrimoxazole_Use\n" +
+                    "FROM\n" +
+                    "    flat_hiv_summary_v15b b\n" +
+                    "        INNER JOIN\n" +
+                    "    amrs.person pp ON pp.person_id = b.person_id\n" +
+                    "        LEFT JOIN\n" +
+                    "    (SELECT \n" +
+                    "        o.person_id, DATE(e.encounter_datetime) encounter_datetime\n" +
+                    "    FROM\n" +
+                    "        amrs.obs o\n" +
+                    "    INNER JOIN amrs.encounter e ON o.encounter_id = e.encounter_id\n" +
+                    "    WHERE\n" +
+                    "        concept_id IN (6042 , 9611)\n" +
+                    "            AND value_coded IN (174 , 864, 5995, 5993)) x ON DATE(x.encounter_datetime) = DATE(b.encounter_datetime)\n" +
+                    "        AND x.person_id = b.person_id\n" +
+                    "        LEFT JOIN\n" +
+                    "    (SELECT \n" +
+                    "        o.person_id,\n" +
+                    "            o.concept_id,\n" +
+                    "            o.value_coded,\n" +
+                    "            o.obs_datetime,\n" +
+                    "            CASE\n" +
+                    "                WHEN o.value_coded = '1600' THEN 'Primary School'\n" +
+                    "                WHEN o.value_coded = '1107' THEN 'None'\n" +
+                    "                WHEN o.value_coded = '1601' THEN 'Primary School'\n" +
+                    "                WHEN o.value_coded = '1604' THEN 'University'\n" +
+                    "                WHEN o.value_coded = '1602' THEN 'Form 1-2'\n" +
+                    "                WHEN o.value_coded = '1603' THEN 'Form 3-4'\n" +
+                    "                WHEN o.value_coded = '6218' THEN 'College'\n" +
+                    "                WHEN o.value_coded = '6215' THEN 'Secondary School'\n" +
+                    "                WHEN o.value_coded = '6214' THEN 'Primary School'\n" +
+                    "                WHEN o.value_coded = '5629' THEN 'Currently in School'\n" +
+                    "                WHEN o.value_coded = '7583' THEN 'Adult Education'\n" +
+                    "                WHEN o.value_coded = '7549' THEN 'Pre unit'\n" +
+                    "                WHEN o.value_coded = '5622' THEN 'Other'\n" +
+                    "                WHEN o.value_coded = '11794' THEN 'Pre Primary'\n" +
+                    "            END AS education_level\n" +
+                    "    FROM\n" +
+                    "        amrs.obs o\n" +
+                    "    INNER JOIN (SELECT \n" +
+                    "        person_id, MAX(obs_datetime) obs_datetime\n" +
+                    "    FROM\n" +
+                    "        amrs.obs\n" +
+                    "    WHERE\n" +
+                    "        concept_id IN (1605)\n" +
+                    "            AND value_coded IN (1107 , 1601, 1604, 1602, 1603, 6218, 6215, 6214, 5629, 7583, 7549, 5622, 11794)\n" +
+                    "            AND voided = 0\n" +
+                    "    GROUP BY person_id) t ON t.person_id = o.person_id\n" +
+                    "        AND t.obs_datetime = o.obs_datetime\n" +
+                    "    WHERE\n" +
+                    "        o.concept_id IN (1605)\n" +
+                    "            AND o.value_coded IN (1107 , 1601, 1604, 1602, 1603, 6218, 6215, 6214, 5629, 7583, 7549, 5622, 11794)\n" +
+                    "            AND o.voided = 0) y ON y.person_id = b.person_id\n" +
+                    "WHERE\n" +
+                    "    b.person_id IN ('" + personId + "') ");
+            // ResultSet rs = stmt.executeQuery("select uuid from afyastat.location where location_id=" + id + "");
+            rs.last();
+            //  x = rs.getRow();
+
+            rs.beforeFirst();
+            while (rs.next()) {
+                String p1 = rs.getString(1); //patient_identifier
+                String p2 = rs.getString(2); //person_id
+                String p3 = rs.getString(3); //gender
+                String p4 = rs.getString(4); //birthdate
+                String p5 = rs.getString(5); //Encounter_Date
+                String p6 = rs.getString(6); //heagith
+                String p7 = rs.getString(7); //weight
+                String p8 = rs.getString(8); //Next_clinical_appointment
+                String p9 = rs.getString(9); //Diagnosis_Date
+                String p10 = rs.getString(10); //Tuberculosis_Treatment_Plan
+                String p11 = rs.getString(11); //Current_WHO_HIV_Stage
+                String p12 = rs.getString(12); //cur_arv_meds
+                String p13 = rs.getString(13); //med_pickup_rtc_date
+                String p14 = rs.getString(14); //cd4_count
+                String p15 = rs.getString(15); //Is_ART
+                String p16 = rs.getString(16); //Is_PMTCT
+                String p17 = rs.getString(17); //VL
+                String p18 = rs.getString(18); //Adherence
+                String p19 = rs.getString(19); //Education_Level
+                String p20 = rs.getString(20); //Screening_For_STI
+                String p21 = rs.getString(21); //Classification_Of_Malnutrition
+                String p22 = rs.getString(22); //Isoniazid_Use
+                String p23 = rs.getString(23); //Cotrimoxazole_Use
+
+                System.out.println("Patient ID " + p1 + " P23 " + p23);
+
+                List<PendullumData> pendullumData = pendulumDataService.FindbyIdandEdate(p1,p5);
+                if(pendullumData.size()>0){
+
+                }else {
+
+                   // String p12 = rs.getString(12); //cur_arv_meds
+                   // String p13 = rs.getString(13); //med_pickup_rtc_date
+
+
+                    PendullumData pd = new PendullumData();
+                    pd.setPatientIdentifier(p1);
+                    pd.setGender(p3);
+                    pd.setBirthdate(p4);
+                    pd.setEncounterDate(p5);
+                    pd.setHeight(p6);
+                    pd.setWeight(p7);
+                    pd.setNext_clinical_appointment(p8);
+                    pd.setDiagnosis_Date(p9);
+                    pd.setTuberculosis_Treatment_Plan(p10);
+                    pd.setCurrent_WHO_HIV_Stage(p11);
+
+                    pd.setCD4_Count(p14);
+                    pd.setIs_ART(p15);
+                    pd.setIs_PMTCT(p16);
+                    pd.setViral_Load(p17);
+                    pd.setAdherence(p18);
+                    pd.setEducation_Level(p19);
+                    pd.setScreening_For_STI(p20);
+                    pd.setClassification_Of_Malnutrition(p21);
+                    pd.setIsoniazid_Use(p22);
+                    pd.setCotrimoxazole_Use(p23);
+                    pd.setDateCreated(nowDate);
+                    pendulumDataService.save(pd);
+                }
+
+
+           }
+
+        }
+        KashaClients kashaClients = kashaClientsList.get(x);
+        kashaClients.setSyncedToPendulum(1);
+        kashaClientsServices.save(kashaClients);
+    }
+
 }
