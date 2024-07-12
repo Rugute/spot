@@ -86,6 +86,9 @@ public class KashaClients {
     @Column(name = "modified_on", nullable = true)
     private Date modifiedOn;
 
+    @Column(name = "synced_to_pendulum", nullable = true)
+    private int syncedToPendulum;
+
     public int getId() {
         return id;
     }
@@ -268,6 +271,14 @@ public class KashaClients {
 
     public void setEligible(int eligible) {
         this.eligible = eligible;
+    }
+
+    public int getSyncedToPendulum() {
+        return syncedToPendulum;
+    }
+
+    public void setSyncedToPendulum(int syncedToPendulum) {
+        this.syncedToPendulum = syncedToPendulum;
     }
 }
 

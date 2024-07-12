@@ -38,7 +38,7 @@ public class KashaAPIV2 {
     @ResponseBody
     @RequestMapping(value="/clients", method = RequestMethod.GET,produces = "application/json")
     public ResponseEntity<Object> handlePostRequest(@RequestParam(defaultValue = "0") int page,
-                                                    @RequestParam(defaultValue = "10") int size) throws ParseException, JSONException
+                                                    @RequestParam(defaultValue = "100") int size) throws ParseException, JSONException
 
         {
 

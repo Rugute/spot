@@ -40,4 +40,6 @@ public class KashaClientsServices {
        Page<KashaClients> clientsPage = kashaClientsRepository.findByEligibleAndConsented(eligible,1, (org.springframework.data.domain.Pageable) pageable);
        return clientsPage.getContent(); // Get the list of clients from the page
    }
+    public List<KashaClients> getNoSyncedToPendulum(int eligible,int consented,int inpedulum){return  kashaClientsRepository.findByEligibleAndConsentedAndSyncedToPendulum(eligible,consented,inpedulum);}
+
 }
