@@ -13,6 +13,7 @@ import java.util.List;
 @Repository("pendullumDataReporitory")
 public interface PendullumDataRepositories extends JpaRepository<PendullumData, Long> {
     Page<PendullumData> findAll(Pageable pageable);
+    Page<PendullumData> findByprojectbeyondEnrolled(int pid,Pageable pageable);
     List<PendullumData> findByPatientIdentifierAndEncounterDate(String pid, String Date);
   //  Page<PendullumData> findByEncounterDateGreaterThanEqual(Date encounterDate, Pageable pageable);
 

@@ -57,7 +57,7 @@ public class PendullumData {
     private String Is_ART;
 
     @Column(name = "Is_project_beyond")
-    private int project_beyond;
+    private int projectbeyondEnrolled;
 
     @Column(name = "Is_PMTCT")
     private String Is_PMTCT;
@@ -88,13 +88,12 @@ public class PendullumData {
     private Date dateCreated;
 
 
-
-    public int getProject_beyond() {
-        return project_beyond;
+    public int getProjectbeyondEnrolled() {
+        return projectbeyondEnrolled;
     }
 
-    public void setProject_beyond(int project_beyond) {
-        this.project_beyond = project_beyond;
+    public void setProjectbeyondEnrolled(int projectbeyondEnrolled) {
+        this.projectbeyondEnrolled = projectbeyondEnrolled;
     }
 
     public int getId() {

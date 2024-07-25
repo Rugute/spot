@@ -56,6 +56,9 @@ public class KashaClients {
     @Column(name = "nearest_landmark")
     private String nearest_landmark;
 
+    @Column(name = "medication_type")
+    private String medication_type;
+
     @Column(name = "gender")
     private String gender;
 
@@ -279,6 +282,14 @@ public class KashaClients {
 
     public void setSyncedToPendulum(int syncedToPendulum) {
         this.syncedToPendulum = syncedToPendulum;
+    }
+
+    public String getMedication_type() {
+        return medication_type;
+    }
+
+    public void setMedication_type(String medication_type) {
+        this.medication_type = medication_type;
     }
 }
 

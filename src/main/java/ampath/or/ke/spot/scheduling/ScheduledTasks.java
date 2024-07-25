@@ -226,7 +226,7 @@ public class ScheduledTasks {
     }
 
      //@Scheduled(cron = "0 */30 * ? * *")
-    // @Scheduled(cron = "0 */1 * ? * *")
+   //  @Scheduled(cron = "0 */1 * ? * *")
     @Scheduled(cron = "0 0,59 * * * *") // 30 minutes
     public void KashaClients() throws JSONException, ParseException, SQLException, IOException {
         // HttpSession session= new HttpSession()
@@ -252,7 +252,8 @@ public class ScheduledTasks {
                 "max(case when pa.person_attribute_type_id=40 then pa.value else NULL end) Alternative_Phone_Number,\n" +
                 "case when max(hiv.med_pickup_rtc_date) is null then max(hiv.next_clinical_rtc_date_hiv) else max(hiv.med_pickup_rtc_date) end  tca,\n" +
                 "padd.address3 nearest_landmark,\n" +
-                "max(case when o.concept_id=12395 && o.value_coded =1065 && o.voided=0 then 1 else 0 end) eligibler\n" +
+                "max(case when o.concept_id=12395 && o.value_coded =1065 && o.voided=0 then 1 else 0 end) eligibler ,\n" +
+                "'ART' medication\n" +
                 "from \n" +
                 "amrs.encounter e\n" +
                 "inner join amrs.obs o on o.encounter_id=e.encounter_id\n" +
@@ -286,6 +287,7 @@ public class ScheduledTasks {
             String tca = rs.getString(13);
             String land_mark = rs.getString(14);
             String eligible = rs.getString(15);
+            String medication = rs.getString(16);
 
             System.out.println("CCC Number " + ccc);
 
@@ -298,6 +300,7 @@ public class ScheduledTasks {
                 KashaClients kc =   kashaClients.get(0);
                 kc.setExpected_next_delivery_date(tcaDate);
                 kc.setEligible(Integer.parseInt(eligible));
+                kc.setMedication_type(medication);
                 kashaClientsServices.save(kc);
 
             } else {
@@ -323,6 +326,7 @@ public class ScheduledTasks {
                 kc.setDateCreated(nowDate);
                 kc.setModifiedOn(nowDate);
                 kc.setEligible(Integer.parseInt(eligible));
+                kc.setMedication_type(medication);
                 kashaClientsServices.save(kc);
             }
 
@@ -808,7 +812,7 @@ public class ScheduledTasks {
     }
 
     //Share live Data to Pendulum
-    //@Scheduled(cron = "0 0,59 * * * *") // 30 minutes
+    @Scheduled(cron = "0 0,59 * * * *") // 30 minutes
     //@Scheduled(cron = "0 */1 * ? * *") // 1 minutes
 
     public void UpdatePendulumFromKashaClients() throws JSONException, ParseException, SQLException, IOException {
@@ -939,6 +943,12 @@ public class ScheduledTasks {
 
                 List<PendullumData> pendullumData = pendulumDataService.FindbyIdandEdate(p1,p5);
                 if(pendullumData.size()>0){
+                    for(int xx=0;xx<pendullumData.size();xx++){
+                        PendullumData pd =pendullumData.get(xx);
+                        pd.setProjectbeyondEnrolled(1);
+                        pendulumDataService.save(pd);
+                    }
+
 
                 }else {
 
@@ -969,16 +979,17 @@ public class ScheduledTasks {
                     pd.setIsoniazid_Use(p22);
                     pd.setCotrimoxazole_Use(p23);
                     pd.setDateCreated(nowDate);
+                    pd.setProjectbeyondEnrolled(1);
                     pendulumDataService.save(pd);
                 }
 
 
            }
-
+            KashaClients kashaClients = kashaClientsList.get(j);
+            kashaClients.setSyncedToPendulum(1);
+            kashaClientsServices.save(kashaClients);
         }
-        KashaClients kashaClients = kashaClientsList.get(x);
-        kashaClients.setSyncedToPendulum(1);
-        kashaClientsServices.save(kashaClients);
+
     }
 
 }

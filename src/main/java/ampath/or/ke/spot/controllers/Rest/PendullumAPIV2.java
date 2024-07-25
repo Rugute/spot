@@ -47,6 +47,16 @@ public class PendullumAPIV2 {
 
         return ResponseEntity.ok(data);
     }
+    @GetMapping("/enrolled/{enrolled}")
+    public ResponseEntity<Page<PendullumData>> PendullumDataEnrolled(@PathVariable int enrolled,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<PendullumData> data = pendullumDataRepositories.findByprojectbeyondEnrolled(enrolled,pageable);
+
+        return ResponseEntity.ok(data);
+    }
     @GetMapping("/dataset/encounter_date")
     public ResponseEntity<Page<PendullumData>> PendullumDataByencounter(
             @RequestParam(defaultValue = "0") int page,

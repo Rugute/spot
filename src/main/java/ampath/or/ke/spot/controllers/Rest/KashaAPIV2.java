@@ -35,8 +35,65 @@ public class KashaAPIV2 {
     @Autowired
     private KashaClientsRepository kashaClientsRepository;
 
+    @GetMapping(value="/clients",produces = "application/json")
+    public ResponseEntity<Object> getClients(@RequestParam(defaultValue = "0") int page,
+                                             @RequestParam(defaultValue = "10") int size) {
+        try {
+            Pageable pageable = PageRequest.of(page, size);
+            Page<KashaClients> clientPage = kashaClientsRepository.findByEligibleAndConsented(1, 1, pageable);
+            List<KashaClients> kashaClientsList = clientPage.getContent();
+
+            List<JSONObject> clientsEntities = new ArrayList<>();
+            for (KashaClients client : kashaClientsList) {
+                clientsEntities.add(convertToJSON(client));
+            }
+
+            JSONObject response = new JSONObject();
+            response.put("clients", clientsEntities);
+            response.put("currentPage", clientPage.getNumber());
+            response.put("totalItems", clientPage.getTotalElements());
+            response.put("totalPages", clientPage.getTotalPages());
+            response.put("pageSize", clientPage.getSize());
+
+            return new ResponseEntity<>(response.toString(), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    private JSONObject convertToJSON(KashaClients client) throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+
+        jsonObject.put("id", client.getId());
+        jsonObject.put("uuid", client.getUuid());
+        jsonObject.put("person_id", client.getPerson_id());
+        jsonObject.put("identifier", client.getIdentifier());
+        jsonObject.put("first_name", client.getFirst_name());
+        jsonObject.put("last_name", client.getLast_name());
+        jsonObject.put("phone_number", client.getPhone_number());
+        jsonObject.put("secondary_phone_number", client.getSecondary_phone_number());
+        jsonObject.put("address", client.getAddress());
+        jsonObject.put("estate_village", client.getEstate_village());
+        jsonObject.put("county", client.getCounty());
+        jsonObject.put("expected_next_delivery_date", client.getExpected_next_delivery_date());
+        jsonObject.put("nearest_landmark", client.getNearest_landmark());
+        jsonObject.put("gender", client.getGender());
+        jsonObject.put("age", client.getAge());
+        jsonObject.put("consented", client.getConsented());
+        jsonObject.put("eligible", client.getEligible());
+        jsonObject.put("dateConsented", client.getDateConsented());
+        jsonObject.put("created_by", client.getCreated_by());
+        jsonObject.put("dateCreated", client.getDateCreated());
+        jsonObject.put("modified_by", client.getModified_by());
+        jsonObject.put("modifiedOn", client.getModifiedOn());
+        jsonObject.put("medication_type", client.getMedication_type());
+        jsonObject.put("facility", client.getMflcode());
+
+        return jsonObject;
+    }
+
     @ResponseBody
-    @RequestMapping(value="/clients", method = RequestMethod.GET,produces = "application/json")
+    @RequestMapping(value="/clientss", method = RequestMethod.GET,produces = "application/json")
     public ResponseEntity<Object> handlePostRequest(@RequestParam(defaultValue = "0") int page,
                                                     @RequestParam(defaultValue = "100") int size) throws ParseException, JSONException
 
@@ -81,7 +138,7 @@ public class KashaAPIV2 {
             client.put("dateCreated", kashaClientsList.get(x).getDateCreated());
             client.put("modified_by", kashaClientsList.get(x).getModified_by());
             client.put("modifiedOn", kashaClientsList.get(x).getModifiedOn());
-            client.put("medication_type","ART");
+            client.put("medication_type",kashaClientsList.get(x).getMedication_type());
             client.put("facility", kashaClientsList.get(x).getMflcode() );//
            /* List<KashaDrugs> drugsList = kashaDrugService.findByPatientId(String.valueOf(kashaClientsList.get(x).getPerson_id()));
             JSONObject drugs = new JSONObject();
