@@ -68,6 +68,9 @@ public class KashaClients {
     @Column(name = "mflcode")
     private String mflcode;
 
+    @Column(name = "facility")
+    private String facility;
+
     @Column(name = "consented")
     private int consented;
 
@@ -91,6 +94,9 @@ public class KashaClients {
 
     @Column(name = "synced_to_pendulum", nullable = true)
     private int syncedToPendulum;
+
+    @Column(name = "prediction_score", nullable = true)
+    private float predictionScore;
 
     public int getId() {
         return id;
@@ -290,6 +296,22 @@ public class KashaClients {
 
     public void setMedication_type(String medication_type) {
         this.medication_type = medication_type;
+    }
+
+    public String getFacility() {
+        return facility;
+    }
+
+    public void setFacility(String facility) {
+        this.facility = facility;
+    }
+
+    public float getPredictionScore() {
+        return predictionScore;
+    }
+
+    public void setPredictionScore(float predictionScore) {
+        this.predictionScore = predictionScore;
     }
 }
 

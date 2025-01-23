@@ -109,8 +109,8 @@ public class KHISController {
         String DateCompleted= dateFormat.format(date);
         obj.put("dataSet", "ptIUGFkE6jn");
         obj.put("completeDate", DateCompleted);
-        obj.put("period", "202404");
-        obj.put("orgUnit", "WmVkqxdy4xB");
+        obj.put("period", "202407");
+        obj.put("orgUnit", "EYME90yhk9j");
         //obj.put("attributeOptionCombo","KOoyurqK0Uf");
        String header=obj.toString();
        String finalDataset="";

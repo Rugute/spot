@@ -3,7 +3,6 @@ package ampath.or.ke.spot.controllers.Rest;
 import ampath.or.ke.spot.models.KashaClients;
 import ampath.or.ke.spot.models.KashaDrugs;
 import ampath.or.ke.spot.repositories.KashaClientsRepository;
-import ampath.or.ke.spot.repositories.PendullumReporitory;
 import ampath.or.ke.spot.services.KashaClientsServices;
 import ampath.or.ke.spot.services.KashaDrugService;
 import org.json.JSONArray;
@@ -25,8 +24,8 @@ import java.util.List;
 import java.util.Locale;
 
 @RestController
-@RequestMapping("/rest/v2/api/kasha")
-public class KashaAPIV2 {
+@RequestMapping("/rest/v3/api/kasha")
+public class KashaAPIV3 {
 
     @Autowired
     private KashaClientsServices kashaClientsServices;
@@ -80,6 +79,7 @@ public class KashaAPIV2 {
         jsonObject.put("nearest_landmark", client.getNearest_landmark());
         jsonObject.put("gender", client.getGender());
         jsonObject.put("age", client.getAge());
+        jsonObject.put("prediction_score",client.getPredictionScore());
         jsonObject.put("consented", client.getConsented());
         jsonObject.put("eligible", client.getEligible());
         jsonObject.put("dateConsented", client.getDateConsented());
@@ -88,7 +88,8 @@ public class KashaAPIV2 {
         jsonObject.put("modified_by", client.getModified_by());
         jsonObject.put("modifiedOn", client.getModifiedOn());
         jsonObject.put("medication_type", client.getMedication_type());
-        jsonObject.put("facility", client.getMflcode());
+        jsonObject.put("facility_mflcode", client.getMflcode());
+        jsonObject.put("facility_name", client.getFacility());
 
         return jsonObject;
     }

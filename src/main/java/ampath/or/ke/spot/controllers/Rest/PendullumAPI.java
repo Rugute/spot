@@ -3,6 +3,11 @@ import ampath.or.ke.spot.models.PendullumData;
 import ampath.or.ke.spot.models.PendulumRiskScores;
 import ampath.or.ke.spot.repositories.PendullumDataRepositories;
 import ampath.or.ke.spot.services.PendulumRiskScoreService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,8 +30,11 @@ import org.springframework.web.bind.annotation.*;
 import javax.persistence.Tuple;
 import javax.servlet.http.HttpSession;
 //import java.awt.print.Pageable;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static ampath.or.ke.spot.utils.GlobalVars._toJson;
 
@@ -137,15 +145,56 @@ public class PendullumAPI {
    // @PostMapping("/riskScores")
     @ResponseBody
     @RequestMapping(value="/riskscores", method = RequestMethod.POST,produces = "application/json")//, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String postRiskScores(@RequestBody String requestBody) {
+    public String postRiskScores(@RequestBody String requestBody) throws JsonProcessingException, JSONException {
         // Here you can process the incoming risk score data
         // For this example, let's just print it
         System.out.println("Received risk score: " + requestBody.toString());
-        PendulumRiskScores pendulumRiskScores = new PendulumRiskScores();
-        pendulumRiskScores.setRisksmg(requestBody.toString());
-        pendulumRiskScoreService.save(pendulumRiskScores);
+        String jsonString =requestBody.toString();
+        jsonString = jsonString.replace("'", "\"");
+
+        // Parse the JSON array
+        JSONArray jsonArray = new JSONArray(jsonString);
+        Date nowDate = new Date();
+        // Loop through each JSON object in the array
+        for (int i = 0; i < jsonArray.length(); i++) {
+            JSONObject jsonObject = jsonArray.getJSONObject(i);
+
+            // Get values from the JSON object
+            String patientID = jsonObject.getString("patientID");
+            String nextClinicalAppointment = jsonObject.getString("nextClinicalAppointment");
+            double noShowScore = jsonObject.getDouble("noShowScore");
+
+            String mdd5 = getMD5(patientID);
+
+            // Print the values
+            System.out.println("Patient ID: " + patientID);
+            System.out.println("Next Clinical Appointment: " + nextClinicalAppointment);
+            System.out.println("No-Show Score: " + noShowScore);
+            System.out.println();
+
+            PendulumRiskScores pendulumRiskScores = new PendulumRiskScores();
+            pendulumRiskScores.setRisksmg(jsonObject.toString());
+            pendulumRiskScores.setPatientIdentifier(patientID);
+            pendulumRiskScores.setNextClinicalAppointment(nextClinicalAppointment);
+            pendulumRiskScores.setNoShowScore(String.valueOf(noShowScore));
+            pendulumRiskScores.setDateCreated(nowDate);
+            pendulumRiskScoreService.save(pendulumRiskScores);
+        }
+
+       // PendulumRiskScores pendulumRiskScores = new PendulumRiskScores();
+       // pendulumRiskScores.setRisksmg(requestBody.toString());
+        //pendulumRiskScoreService.save(pendulumRiskScores);
         // You can perform further processing or return a response
         return "Risk score received successfully!";
+    }
+    public String getMD5(String number) {
+        String result ="";
+        // Decode the Base64 string
+        byte[] decodedBytes = Base64.getDecoder().decode(number);
+        // Convert the byte array to a string
+        String decodedString = new String(decodedBytes);
+        result = decodedString;
+        return result;
     }
 }
 

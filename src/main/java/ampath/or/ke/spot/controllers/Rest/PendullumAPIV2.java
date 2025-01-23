@@ -57,6 +57,26 @@ public class PendullumAPIV2 {
 
         return ResponseEntity.ok(data);
     }
+    @GetMapping("/patient/{pid}")
+    public ResponseEntity<Page<PendullumData>> PendullumPIDDataEnrolled(@PathVariable String pid,
+                                                                     @RequestParam(defaultValue = "0") int page,
+                                                                     @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<PendullumData> data = pendullumDataRepositories.findBypatientIdentifier(pid,pageable);
+
+        return ResponseEntity.ok(data);
+    }
+    @GetMapping("/encounter_date/{startdate}/{enddate}")
+    public ResponseEntity<Page<PendullumData>> PendullumDncounter_dateDataEnrolled(@PathVariable String startdate,
+                                                                                   @PathVariable String enddate,
+                                                                        @RequestParam(defaultValue = "0") int page,
+                                                                        @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<PendullumData> data = pendullumDataRepositories.getBystartandendDate(startdate,enddate,pageable);
+
+        return ResponseEntity.ok(data);
+    }
     @GetMapping("/dataset/encounter_date")
     public ResponseEntity<Page<PendullumData>> PendullumDataByencounter(
             @RequestParam(defaultValue = "0") int page,

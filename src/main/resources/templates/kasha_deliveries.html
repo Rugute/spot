@@ -212,7 +212,8 @@
                         <table class="table table-striped table-sm fs--1 mb-0">
                             <thead>
                             <tr>
-                                <th class="sort align-middle" data-sort="code">UUID</th>
+                                <th class="sort align-middle" data-sort="code">MFLCode</th>
+                                <th class="sort align-middle" data-sort="code">Facility</th>
                                 <th class="sort align-middle" data-sort="du">Identifier</th>
                                 <th class="sort align-middle ps-3" data-sort="name">Name</th>
                                 <th class="sort align-middle" data-sort="cu">OrderNumber</th>
@@ -227,7 +228,8 @@
                             </thead>
                             <tbody class="list">
                             <tr th:each="obj : ${mappings}" class="hover-actions-trigger btn-reveal-trigger position-static">
-                                <td class="align-middle code"><span th:text="${obj.uuid}"></span></td>
+                                <td class="align-middle code"><span th:text="${obj.mflcode}"></span></td>
+                                <td class="align-middle code"><span th:text="${obj.facility}"></span></td>
                                 <td class="align-middle du"><span th:text="${obj.identifier}"></span></td>
                                 <td class="align-middle ps-3 name">
                                     <span th:text="${obj.first_name} +' '+${obj.last_name}"></span></td>

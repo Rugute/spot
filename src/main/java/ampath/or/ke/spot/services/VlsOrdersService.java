@@ -21,7 +21,7 @@ public class VlsOrdersService {
 
     }
     public VlsOrders save( VlsOrders vlsOrders) {
-        return vlsOrdersRepository.save(vlsOrders);
+        return vlsOrdersRepository.saveAndFlush(vlsOrders);
     }
     public List<VlsOrders> findEncounterUUID(String uuid){return vlsOrdersRepository.findByEncounterUuid(uuid);}
 }

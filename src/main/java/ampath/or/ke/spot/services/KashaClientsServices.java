@@ -42,4 +42,6 @@ public class KashaClientsServices {
    }
     public List<KashaClients> getNoSyncedToPendulum(int eligible,int consented,int inpedulum){return  kashaClientsRepository.findByEligibleAndConsentedAndSyncedToPendulum(eligible,consented,inpedulum);}
 
+    public List<KashaClients> findByMd5PersonId(String md5){return  kashaClientsRepository.findByMd5PersonId(md5);}
+
 }

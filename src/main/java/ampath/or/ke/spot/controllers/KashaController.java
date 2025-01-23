@@ -56,6 +56,9 @@ public class KashaController {
        String fvalues="";
         //kashaDeliveriesList.size()
        for(int x=0;x<1;x++) {
+
+           KashaDeliveries ks = kashaDeliveriesList.get(x);
+
            String person_id = String.valueOf(kashaDeliveriesList.get(x).getPerson_id());
            String edate = kashaDeliveriesList.get(x).getCreated_at();
 
@@ -120,7 +123,6 @@ public class KashaController {
            //
 
 
-
            //
 
            JSONObject jsonVisit = new JSONObject();
@@ -148,7 +150,7 @@ public class KashaController {
 
            System.out.println(fvalues);
            //set cookies
-           OkHttpClient sessionclient = new OkHttpClient();
+         /*  OkHttpClient sessionclient = new OkHttpClient();
            Request sessionrequest = new Request.Builder()
                    .url( url+"/session")
                    .method("GET", null)
@@ -161,10 +163,26 @@ public class KashaController {
            JSONObject jsonObject = new JSONObject(json);
            String sessionID = (String) jsonObject.get("sessionId");
            String cookie="JSESSIONID="+sessionID;
-           session.setAttribute("cookie", cookie);
+           session.setAttribute("cookie", cookie);  */
+           OkHttpClient client = new OkHttpClient();
+           MediaType mediaType = MediaType.parse("application/json");
+           RequestBody body = RequestBody.create(mediaType, fvalues);
+           Request request = new Request.Builder()
+                   .url(url + "/encounter")
+                   .method("POST", body)
+                   .addHeader("Authorization", "Basic " + authSynccode)
+                   .addHeader("Content-Type", "application/json")
+                   .build();
+           Response response = client.newCall(request).execute();
+
+           String resBody = response.request().toString();
+           int rescode = response.code();
+
+           // System.out.println("Response ndo hii " + jsonUser.toString());
+          // System.out.println("Response ndo hii " + response.request());
 
            //end of set cookies
-           OkHttpClient client = new OkHttpClient();
+          /* OkHttpClient client = new OkHttpClient();
            MediaType mediaType = MediaType.parse("application/json");
            RequestBody body = RequestBody.create(mediaType, fvalues);
            Request request = new Request.Builder()
@@ -172,13 +190,16 @@ public class KashaController {
                    .method("POST", body)
                    .addHeader("Authorization", "Basic " + authSynccode)
                    .addHeader("Content-Type", "application/json")
-                   .addHeader("Cookie", (String) session.getAttribute("cookie"))
                    .build();
-           Response response = client.newCall(request).execute();
+           Response response = client.newCall(request).execute(); */
 
            //System.out.println("Payload "+payload);
           // System.out.println("Response ndo hii " + fvalues.toString());
-           System.out.println("Response ndo hii " + response.body().string());
+           System.out.println("Response ndo hii " + resBody);
+           ks.setInAMRS(1);
+           if(rescode==201) {
+               kashaDeliveriesService.save(ks);
+           }
        }
 
           return new ResponseEntity<Object>(fvalues, HttpStatus.OK);

@@ -30,6 +30,7 @@ public class AfyastatErrorsService {
     public List<AfyastatErrors> getErrorsnullcode(String disc){return  afyastatErrorsRepository.findByDiscriminatorAndResponsecodeIsNull(disc);}
 
     public List<AfyastatErrors> getByDiscriminatorAndResponsecode(String disc,String code){return  afyastatErrorsRepository.findByDiscriminatorAndResponsecode(disc,code);}
+    public List<AfyastatErrors> getByDiscriminatorAndResponsecodeisNull(String disc){return  afyastatErrorsRepository.findByDiscriminatorAndResponsecodeIsNull(disc);}
 
     public List<AfyastatErrors> getPendingErrorsrrors(){return  afyastatErrorsRepository.findByResponsecodeIsNull();}
 

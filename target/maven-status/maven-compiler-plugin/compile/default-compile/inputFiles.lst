@@ -21,6 +21,7 @@
 /Users/directorict/rugute/spot/src/main/java/ampath/or/ke/spot/repositories/DatabasesInfoRepository.java
 /Users/directorict/rugute/spot/src/main/java/ampath/or/ke/spot/models/NewonARTLineList.java
 /Users/directorict/rugute/spot/src/main/java/ampath/or/ke/spot/services/AfyastatClientLineListService.java
+/Users/directorict/rugute/spot/src/main/java/ampath/or/ke/spot/controllers/Rest/KashaAPIV3.java
 /Users/directorict/rugute/spot/src/main/java/ampath/or/ke/spot/models/PendulumRiskScores.java
 /Users/directorict/rugute/spot/src/main/java/ampath/or/ke/spot/controllers/VLsController.java
 /Users/directorict/rugute/spot/src/main/java/ampath/or/ke/spot/scheduling/CareTasks.java
@@ -88,6 +89,7 @@
 /Users/directorict/rugute/spot/src/main/java/ampath/or/ke/spot/controllers/AuthController.java
 /Users/directorict/rugute/spot/src/main/java/ampath/or/ke/spot/controllers/DashboardController.java
 /Users/directorict/rugute/spot/src/main/java/ampath/or/ke/spot/services/VlsOrdersService.java
+/Users/directorict/rugute/spot/src/main/java/ampath/or/ke/spot/scheduling/VLTask.java
 /Users/directorict/rugute/spot/src/main/java/ampath/or/ke/spot/models/DatabasesInfo.java
 /Users/directorict/rugute/spot/src/main/java/ampath/or/ke/spot/services/AfyastatLineListService.java
 /Users/directorict/rugute/spot/src/main/java/ampath/or/ke/spot/models/SurgeReport.java
@@ -131,6 +133,7 @@
 /Users/directorict/rugute/spot/src/main/java/ampath/or/ke/spot/services/RoleService.java
 /Users/directorict/rugute/spot/src/main/java/ampath/or/ke/spot/utils/HtmlEmails.java
 /Users/directorict/rugute/spot/src/main/java/ampath/or/ke/spot/models/KashaDrugs.java
+/Users/directorict/rugute/spot/src/main/java/ampath/or/ke/spot/controllers/VLS.java
 /Users/directorict/rugute/spot/src/main/java/ampath/or/ke/spot/controllers/Rest/ApiKeyFilter.java
 /Users/directorict/rugute/spot/src/main/java/ampath/or/ke/spot/services/PeriodServices.java
 /Users/directorict/rugute/spot/src/main/java/ampath/or/ke/spot/repositories/PeriodRepository.java

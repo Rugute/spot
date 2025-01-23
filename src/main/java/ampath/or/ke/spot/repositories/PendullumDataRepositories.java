@@ -14,6 +14,7 @@ import java.util.List;
 public interface PendullumDataRepositories extends JpaRepository<PendullumData, Long> {
     Page<PendullumData> findAll(Pageable pageable);
     Page<PendullumData> findByprojectbeyondEnrolled(int pid,Pageable pageable);
+    Page<PendullumData> findBypatientIdentifier(String pid,Pageable pageable);
     List<PendullumData> findByPatientIdentifierAndEncounterDate(String pid, String Date);
   //  Page<PendullumData> findByEncounterDateGreaterThanEqual(Date encounterDate, Pageable pageable);
 
@@ -21,6 +22,9 @@ public interface PendullumDataRepositories extends JpaRepository<PendullumData, 
   //  Page<?> getAllsummaries (Pageable pageable);
     @Query("SELECT p FROM PendullumData p WHERE date(p.encounterDate) = date(:encounterDate)")
     Page<?> getAllsummaries(String encounterDate, Pageable pageable);
+
+    @Query("SELECT p FROM PendullumData p WHERE date(p.encounterDate) >= date(:startDate) and date(p.encounterDate) <= date(:endDate) ")
+    Page<PendullumData> getBystartandendDate(String startDate,String endDate, Pageable pageable);
 
 
 }

@@ -97,6 +97,12 @@ public class KashaDeliveries {
     @Column(name = "modified_on", nullable = true)
     private Date modified_on;
 
+    @Column(name = "mflcode")
+    private String mflcode;
+
+    @Column(name = "facility")
+    private String facility;
+
     public int getId() {
         return id;
     }
@@ -310,5 +316,21 @@ public class KashaDeliveries {
 
     public void setInAMRS(int inAMRS) {
         this.inAMRS = inAMRS;
+    }
+
+    public String getMflcode() {
+        return mflcode;
+    }
+
+    public void setMflcode(String mflcode) {
+        this.mflcode = mflcode;
+    }
+
+    public String getFacility() {
+        return facility;
+    }
+
+    public void setFacility(String facility) {
+        this.facility = facility;
     }
 }

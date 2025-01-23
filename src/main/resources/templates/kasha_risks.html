@@ -197,7 +197,7 @@
 
         <div class="tab-content mt-3" id="myTabContent">
             <div class="tab-pane fade show active" id="tab-home" role="tabpanel" aria-labelledby="home-tab">
-                <b>Project Beyond Clients </b>
+                <b>Project Beyond Prediction Scores </b>
 
                 <div id="tableExample3" data-list='{"valueNames":["name","code","du","cu","category","version","status"],"page":10,"pagination":true}'>
                     <div class="search-box mb-3 mx-auto">
@@ -215,86 +215,30 @@
                                 <th class="sort align-middle" data-sort="code">MFLCode</th>
                                 <th class="sort align-middle" data-sort="code">Facility</th>
                                 <th class="sort align-middle" data-sort="du">Identifier</th>
-                                <th class="sort align-middle ps-3" data-sort="name">Name</th>
-                                <th class="sort align-middle" data-sort="cu">Phone Number</th>
-                                <th class="sort align-middle" data-sort="category">Gender</th>
-                                <th class="sort align-middle" data-sort="version">Expected Next Delivery Date</th>
-                                <th class="sort align-middle" data-sort="status">Consented</th>
-                                <th class="sort align-middle" data-sort="eligible">Eligible</th>
-                                <th class="sort align-middle" data-sort="enrolled">Enrolled</th>
-                                <th class="sort text-end align-middle pe-0" scope="col">ACTION</th>
+                                <th class="sort align-middle ps-3" data-sort="name">Next Clinical Appointment</th>
+                                <th class="sort align-middle" data-sort="cu">Risks Score</th>
+                                <th class="sort align-middle" data-sort="category">Implication</th>
+
                             </tr>
                             </thead>
                             <tbody class="list">
                             <tr th:each="obj : ${mappings}" class="hover-actions-trigger btn-reveal-trigger position-static">
                                 <td class="align-middle code"><span th:text="${obj.mflcode}"></span></td>
                                 <td class="align-middle code"><span th:text="${obj.facility}"></span></td>
-                                <td class="align-middle du"><span th:text="${obj.identifier}"></span></td>
-                                <td class="align-middle ps-3 name">
-                                    <span th:text="${obj.first_name} +' '+${obj.last_name}"></span></td>
-
-                                <td class="align-middle cu"><span th:text="${obj.phone_number}"></span></td>
-                                <td class="align-middle category"><span th:text="${obj.gender}"></span></td>
-                                <td class="align-middle version"><span th:text="${obj.expected_next_delivery_date}"></span></td>
+                                <td class="align-middle du"><span th:text="${obj.cccno}"></span></td>
+                                <td class="align-middle cu"><span th:text="${obj.nextClinicalAppointment}"></span></td>
+                                <td class="align-middle category"><span th:text="${obj.noShowScore}"></span></td>
                                 <td class="align-middle status">
-                                    <span th:if="${obj.consented}==1">
-                                                <div class="badge badge-phoenix fs--2 badge-phoenix-success">
-                                        <span class="fw-bold" th:text="${obj.consented}"></span>
-                                        <span class="ms-1 fas fa-stream"></span>
-                                    </div>
-                                            </span>
-                                    <span th:if="${obj.consented}!=1">
-                                               <div class="badge badge-phoenix fs--2 badge-phoenix-warn">
-                                        <span class="fw-bold" th:text="${obj.consented}"></span>
-                                        <span class="ms-1 fas fa-stream"></span>
-                                    </div>
-                                            </span>
+                                               <div class="badge badge-phoenix fs--2 badge-phoenix-success">
+                                                    <span class="fw-bold" th:text="${obj.scale}">No</span>
+                                                    <span class="ms-1 fas fa-stream"></span>
+                                               </div>
+
 
                                 </td>
-                                <td class="align-middle status">
-                                    <span th:if="${obj.eligible}==1">
-                                                <div class="badge badge-phoenix fs--2 badge-phoenix-success">
-                                                    <span class="fw-bold" th:text="${obj.eligible}"></span>
-                                                    <span class="ms-1 fas fa-stream"></span>
-                                               </div>
-                                    </span>
-                                    <span th:if="${obj.eligible}!=1">
-                                               <div class="badge badge-phoenix fs--2 badge-phoenix-warning">
-                                                    <span class="fw-bold" th:text="${obj.eligible}"></span>
-                                                    <span class="ms-1 fas fa-stream"></span>
-                                               </div>
-                                    </span>
+                                <td class="align-middle category"><span th:text="${obj.DrugDeliverStatus}"></span></td>
 
-                                </td>
-                               <!-- <td class="align-middle status">
-                                    <div class="badge badge-phoenix fs--2 badge-phoenix-success">
-                                        <span class="fw-bold" th:text="${obj.eligible}"></span>
-                                        <span class="ms-1 fas fa-stream"></span>
-                                    </div>
-                                </td> -->
-                                <td class="align-middle status">
-                                    <span th:if="${obj.eligible}==1">
-                                                <div class="badge badge-phoenix fs--2 badge-phoenix-success">
-                                                    <span class="fw-bold">Yes</span>
-                                                    <span class="ms-1 fas fa-stream"></span>
-                                               </div>
-                                    </span>
-                                    <span th:if="${obj.eligible}!=1">
-                                               <div class="badge badge-phoenix fs--2 badge-phoenix-danger">
-                                                    <span class="fw-bold">No</span>
-                                                    <span class="ms-1 fas fa-stream"></span>
-                                               </div>
-                                    </span>
-                                </td>
-                                <td class="align-middle white-space-nowrap text-end pe-0">
-                                    <div class="font-sans-serif btn-reveal-trigger position-static"><button class="btn btn-sm dropdown-toggle dropdown-caret-none transition-none btn-reveal fs--2" type="button" data-bs-toggle="dropdown" data-boundary="window" aria-haspopup="true" aria-expanded="false" data-bs-reference="parent"><svg class="svg-inline--fa fa-ellipsis fs--2" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="ellipsis" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><path fill="currentColor" d="M120 256C120 286.9 94.93 312 64 312C33.07 312 8 286.9 8 256C8 225.1 33.07 200 64 200C94.93 200 120 225.1 120 256zM280 256C280 286.9 254.9 312 224 312C193.1 312 168 286.9 168 256C168 225.1 193.1 200 224 200C254.9 200 280 225.1 280 256zM328 256C328 225.1 353.1 200 384 200C414.9 200 440 225.1 440 256C440 286.9 414.9 312 384 312C353.1 312 328 286.9 328 256z"></path></svg><!-- <span class="fas fa-ellipsis-h fs--2"></span> Font Awesome fontawesome.com --></button>
-                                        <div class="dropdown-menu dropdown-menu-end py-2"><a class="dropdown-item" href="#!">View</a><a class="dropdown-item" href="#!">Export</a>
-                                            <div class="dropdown-divider"></div><a class="dropdown-item text-danger" href="#!">Remove</a>
-                                        </div>
-                                    </div>
-                                </td>
                             </tr>
-
 
                             </tbody>
                         </table>

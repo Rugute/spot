@@ -47,7 +47,6 @@ public class SMTPController {
         else{
             return new ModelAndView("redirect:/setup");
         }
-
     }
     @RequestMapping(value="/addsmtpserver", method = RequestMethod.POST)
     public ModelAndView AddDetails(HttpSession session, @Valid SMTPServer smtpServer , BindingResult bindingResult){

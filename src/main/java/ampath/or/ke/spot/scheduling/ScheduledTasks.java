@@ -4,6 +4,7 @@ import ampath.or.ke.spot.models.*;
 import ampath.or.ke.spot.services.*;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.squareup.okhttp.*;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,16 +20,16 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.sql.*;
+import java.sql.Connection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.UUID;
 
 @Component
 public class ScheduledTasks {
@@ -40,10 +41,8 @@ public class ScheduledTasks {
     public String server;
     @Value("${kasha.key}")
     public String kashaKey;
-
     @Value("${kasha.url}")
     public String kashaURL;
-
     //ETL
     @Value("${spring.etl.username}")
     public String etl_username;
@@ -60,6 +59,8 @@ public class ScheduledTasks {
     private String openmrs_username;
     @Value("${spring.openmrs.password}")
     private String openmrs_password;
+    @Value("${spring.openmrs.live.sync}")
+    private String authSynccode;
 
     @Autowired
     private AfyastatErrorsService afyastatErrorsService;
@@ -72,6 +73,10 @@ public class ScheduledTasks {
     private KashaDeliveriesService kashaDeliveriesService;
     @Autowired
     private PendulumDataService pendulumDataService;
+    @Autowired
+    private FacilitiesService facilitiesService;
+    @Autowired
+    private PendulumRiskScoreService pendulumRiskScoreService;
 
 
     //@Scheduled(cron = "0 */1 * ? * *")
@@ -99,8 +104,8 @@ public class ScheduledTasks {
 
     }
 
-    //@Scheduled(cron = "0 */1 * ? * *")
-    @Scheduled(cron = "0 0,59 * * * *") // 30 minutes
+    @Scheduled(cron = "0 */1 * ? * *")
+    //@Scheduled(cron = "0 0,59 * * * *") // 30 minutes
     public void ProcessKashaDeliveries() throws JSONException, ParseException, SQLException, IOException {
 
         // Sending get request
@@ -163,11 +168,16 @@ public class ScheduledTasks {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             String formattedDateTime = localDateTime.format(formatter);
 
-           String created_at = localDateTime.format(formatter);// dataEntry.get("created_at");
+            String created_at = localDateTime.format(formatter);// dataEntry.get("created_at");
              String updated_at = (String) dataEntry.get("updated_at");
+             System.out.println("orderNumber"+ orderNumber);
+            System.out.println("CCCno"+ identifier);
+            //System.out.println("MFLCODE "+getMFLCode(identifier));
+            //System.out.println("Facility "+ getFacility(identifier));
+
 
             List<KashaDeliveries> kashaDeliveries = kashaDeliveriesService.getOrderNumber(orderNumber);
-            if(kashaDeliveries.size()>0){
+            if(!kashaDeliveries.isEmpty()){
                 KashaDeliveries kd = kashaDeliveries.get(0);
                 kd.setPerson_id(personId);
                 kd.setFirst_name(first_name);
@@ -186,6 +196,8 @@ public class ScheduledTasks {
                 kd.setUpdated_at(updated_at);
                 kd.setCreated_on(nowDate);
                 kd.setCreated_by(1);
+               // kd.setMflcode(getMFLCode(identifier));
+               // kd.setFacility(getFacility(identifier));
                 if(personId==0) {
 
                 }else {
@@ -211,7 +223,8 @@ public class ScheduledTasks {
                 kd.setUpdated_at(updated_at);
                 kd.setCreated_on(nowDate);
                 kd.setCreated_by(1);
-
+               // kd.setMflcode(getMFLCode(identifier));
+                //kd.setFacility(getFacility(identifier));
                 if(personId==0) {
 
                 }else {
@@ -225,9 +238,8 @@ public class ScheduledTasks {
 
     }
 
-     //@Scheduled(cron = "0 */30 * ? * *")
-   //  @Scheduled(cron = "0 */1 * ? * *")
-    @Scheduled(cron = "0 0,59 * * * *") // 30 minutes
+    @Scheduled(cron = "0 */1 * ? * *")
+    //@Scheduled(cron = "0 0,59 * * * *") // 30 minutes
     public void KashaClients() throws JSONException, ParseException, SQLException, IOException {
         // HttpSession session= new HttpSession()
         // List<KashaClients> kashaClientsList = kashaClientsServices.getAllDataset();
@@ -258,7 +270,7 @@ public class ScheduledTasks {
                 "amrs.encounter e\n" +
                 "inner join amrs.obs o on o.encounter_id=e.encounter_id\n" +
                 "inner join amrs.person p on p.person_id=e.patient_id\n" +
-                "inner join amrs.patient_identifier pii on pii.patient_id=e.patient_id\n" +
+                "inner join amrs.patient_identifier pii on pii.patient_id=e.patient_id and pii.voided=0\n" +
                 "inner join amrs.person_name pn on pn.person_id = p.person_id and pn.preferred=1\n" +
                 "inner join amrs.person_attribute pa on pa.person_id = p.person_id and pa.person_attribute_type_id in(10,40,31,41)\n" +
                 "inner join amrs.person_address padd on padd.person_id =p.person_id and padd.preferred=1\n" +
@@ -290,17 +302,21 @@ public class ScheduledTasks {
             String medication = rs.getString(16);
 
             System.out.println("CCC Number " + ccc);
+            System.out.println("MFLCODE " + getFacility(ccc));
+            System.out.println("Facility Name " + getMFLCode(ccc));
 
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.ENGLISH);
             Date tcaDate = formatter.parse(tca);
             Date dateConsented = formatter.parse(date_consented);
 
             List<KashaClients> kashaClients = kashaClientsServices.getByIdentifier(ccc);
-            if (kashaClients.size() > 0) {
+            if (!kashaClients.isEmpty()) {
                 KashaClients kc =   kashaClients.get(0);
                 kc.setExpected_next_delivery_date(tcaDate);
                 kc.setEligible(Integer.parseInt(eligible));
                 kc.setMedication_type(medication);
+                kc.setMflcode(getMFLCode(ccc));
+                kc.setFacility(getFacility(ccc));
                 kashaClientsServices.save(kc);
 
             } else {
@@ -327,6 +343,8 @@ public class ScheduledTasks {
                 kc.setModifiedOn(nowDate);
                 kc.setEligible(Integer.parseInt(eligible));
                 kc.setMedication_type(medication);
+                kc.setMflcode(getMFLCode(ccc));
+                kc.setFacility(getFacility(ccc));
                 kashaClientsServices.save(kc);
             }
 
@@ -337,6 +355,114 @@ public class ScheduledTasks {
 
     }
 
+    public String getMFLCode(String number) {
+        // Split the string by the hyphen
+        String[] parts = number.split("-");
+
+        System.out.println("Number is here "+number);
+
+        // Convert each part to an integer
+        String result = String.valueOf(Integer.parseInt(parts[0]));
+        /*for (int i = 0; i < parts.length; i++) {
+            result[i] = Integer.parseInt(parts[i]);
+        } */
+
+        return result;
+    }
+
+    public String getFacility(String number) {
+        // Split the string by the hyphen
+        String[] parts = number.split("-");
+
+        // Convert each part to an integer
+        String result ="";
+        Facilities facilities =facilitiesService.getByMFLCODE(String.valueOf(Integer.parseInt(parts[0])));
+        if(facilities==null){
+
+        }else {
+             result = facilities.getFacilityname();
+        }
+                /*for (int i = 0; i < parts.length; i++) {
+            result[i] = Integer.parseInt(parts[i]);
+        } */
+
+        return result;
+    }
+
+    public String getMD5(String number) {
+        String result ="";
+        // Decode the Base64 string
+        byte[] decodedBytes = Base64.getDecoder().decode(number);
+        // Convert the byte array to a string
+        String decodedString = new String(decodedBytes);
+       result = decodedString;
+        return result;
+    }
+      @Scheduled(cron="0 0,30 * * * *") // 30 minutes
+  //  @Scheduled(cron = "0 */1 * ? * *")
+    public void Deliveries() throws JSONException, ParseException, SQLException, IOException {
+        List<KashaDeliveries> kashaDeliveries = kashaDeliveriesService.getAllDataset();
+        for(int x=0;x<kashaDeliveries.size();x++){
+            KashaDeliveries kd = kashaDeliveries.get(x);
+            String ccc = kd.getIdentifier();
+            System.out.println("CCC Number " + ccc);
+            System.out.println("MFLCODE " + getFacility(ccc));
+            System.out.println("Facility Name " + getMFLCode(ccc));
+
+            kd.setMflcode(getMFLCode(ccc));
+            kd.setFacility(getFacility(ccc));
+            kashaDeliveriesService.save(kd);
+
+
+        }
+
+
+    }
+    @Scheduled(cron = "0 */1 * ? * *")
+    public void PredictionsScokes() throws JSONException, ParseException, SQLException, IOException {
+        List<PendulumRiskScores> pendulumRiskScores = pendulumRiskScoreService.GetALLData();
+        for(int x=0;x<pendulumRiskScores.size();x++){
+            try {
+                PendulumRiskScores p = pendulumRiskScores.get(x);
+
+                String md5 = getMD5(p.getPatientIdentifier());
+                List<KashaClients> k = kashaClientsServices.findByMd5PersonId(md5);
+                String cccno = k.get(0).getIdentifier();
+                String Mflcode = k.get(0).getMflcode();
+                String facility = k.get(0).getFacility();
+                String pid = String.valueOf(k.get(0).getPerson_id());
+                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
+                DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+                System.out.println("CCC is here " + cccno + " here " + String.valueOf(k.get(0).getExpected_next_delivery_date()));
+                LocalDate dateTimeAsDate = LocalDateTime.parse(String.valueOf(k.get(0).getExpected_next_delivery_date()), dateTimeFormatter).toLocalDate();
+                LocalDate date = LocalDate.parse(p.getNextClinicalAppointment(), dateFormatter);
+                if (dateTimeAsDate.equals(date)) {
+                    KashaClients kcc = k.get(0);
+
+                    kcc.setPredictionScore(Float.parseFloat(p.getNoShowScore()));
+
+                    kashaClientsServices.save(kcc);
+
+                    System.out.println("The dates are equal.");
+                } else {
+                    System.out.println("The dates are not equal.");
+                }
+
+
+                p.setMflcode(Mflcode);
+                p.setFacility(facility);
+                p.setCccno(cccno);
+                p.setPersonId(pid);
+                pendulumRiskScoreService.save(p);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+           // kashaClientsServices.save()
+        }
+
+
+    }
 
    //  @Scheduled(cron="0 0,30 * * * *") // 30 minutes
     // @Scheduled(cron = "0 */1 * ? * *")
@@ -387,7 +513,7 @@ public class ScheduledTasks {
             //  Date dateConsented =formatter.parse(date_consented);
 
             List<KashaDrugs> kashaDrugs = kashaDrugService.findByEncounterId(encounter_id);
-            if (kashaDrugs.size() > 0) {
+            if (!kashaDrugs.isEmpty()) {
                // findByEncounterId
             } else {
                 KashaDrugs kd = new KashaDrugs();
@@ -410,7 +536,8 @@ public class ScheduledTasks {
         con.close();
     }
 
-     // @Scheduled(cron = "0 */1 * ? * *")
+    //@Scheduled(cron = "0 */1 * ? * *")
+    @Scheduled(cron = "0 0,59 * * * *") // 30 minutes
     public void updatedpendulum() throws JSONException, ParseException, SQLException, IOException {
         Date nowDate = new Date();
         Connection con = DriverManager.getConnection(etl_server, etl_username, etl_password);
@@ -810,6 +937,125 @@ public class ScheduledTasks {
         }
         return conceptValue;
     }
+//Post To AMRS Delivereies
+    @Scheduled(cron = "0 */1 * ? * *") // 30 minutes
+    public void posttoAMRS() throws SQLException, JSONException, IOException {
+        List<KashaDeliveries> kashaDeliveriesList = kashaDeliveriesService.getDeliveredInAMRS(0,"true");
+        String fvalues="";
+        //kashaDeliveriesList.size()
+        for(int x=0;x<1;x++) {
+
+            KashaDeliveries ks = kashaDeliveriesList.get(x);
+
+            String person_id = String.valueOf(kashaDeliveriesList.get(x).getPerson_id());
+            String edate = kashaDeliveriesList.get(x).getCreated_at();
+
+            String sql = "SELECT p.uuid,  c.uuid concept_uuid, \n" +
+                    "x.encounter_id  ,x.location_uuid  , case when o.value_coded is null then o.value_datetime else cc.uuid end output, c.concept_id\n" +
+                    " From amrs.obs o \n" +
+                    " INNER JOIN amrs.concept c ON c.concept_id = o.concept_id\n" +
+                    "  INNER JOIN amrs.person p on p.person_id=o.person_id\n" +
+                    " left join amrs.concept cc on o.value_coded=cc.concept_id\n" +
+                    " INNER JOIN\n" +
+                    "(SELECT  \n" +
+                    " e.encounter_id, \n" +
+                    " e.location_id,\n" +
+                    " l.uuid location_uuid\n" +
+                    "FROM amrs.encounter e\n" +
+                    " inner join amrs.location l on e.location_id=l.location_id\n" +
+                    "WHERE e.patient_id = '"+person_id +"' \n" +
+                    "  AND e.encounter_type = 2 \n" +
+                    "ORDER BY e.encounter_id DESC \n" +
+                    " LIMIT 1) x on x.encounter_id=o.encounter_id\n" +
+                    " where o.concept_id in(1265,1261,1268,1088,1109,5096,1192,6744,1255)\n";
+            Connection conn = DriverManager.getConnection(server, username, password);
+            Statement stmtt = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            System.out.println("Text " + sql);
+            ResultSet resultSett = stmtt.executeQuery(sql);
+            String puuid = "";
+            JSONArray jsonObservations = new JSONArray();
+
+            String luuid = "";
+
+            while (resultSett.next()) {
+                System.out.println("concept_id "+ resultSett.getString("concept_id").toString());
+                luuid=resultSett.getString("location_uuid").toString();
+                puuid = resultSett.getString("uuid").toString();
+                JSONObject jsonObservation = new JSONObject();
+                //  jsonObservation.put("person",resultSett.getString("uuid").toString());//"60168b73-60f1-4044-9dc6-84fdcbc1962c");
+                jsonObservation.put("concept", resultSett.getString("concept_uuid").toString());//String.valueOf(conceptId));//+"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                jsonObservation.put("value", resultSett.getString("output").toString());
+                jsonObservation.put("obsDatetime", edate);//+"T06:08:25.000+0000"
+                jsonObservations.put(jsonObservation);
+            }
+            //Pickup Facility
+            JSONObject jsonObservation = new JSONObject();
+            jsonObservation.put("concept","2de21f17-b9ec-4934-8b79-a6e7baa3a5a0" );//String.valueOf(conceptId));//+"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+            jsonObservation.put("value", "a89c2f42-1350-11df-a1f1-0026b9348838");
+            jsonObservation.put("obsDatetime", edate);//+"T06:08:25.000+0000"
+            jsonObservations.put(jsonObservation);
+
+            //INDIVIDUAL WHO PICKED DRUGS
+            JSONObject jsonwhopickeddrugs = new JSONObject();
+            jsonwhopickeddrugs.put("concept","a89cd410-1350-11df-a1f1-0026b9348838" );//String.valueOf(conceptId));//+"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+            jsonwhopickeddrugs.put("value", "d1c4a2c9-6326-41ab-baae-8239ec697620");
+            jsonwhopickeddrugs.put("obsDatetime", edate);//+"T06:08:25.000+0000"
+            jsonObservations.put(jsonwhopickeddrugs);
+
+            //THERAPEUTIC PLAN NOTES
+            JSONObject jsonplan = new JSONObject();
+            jsonplan.put("concept","23f710cc-7f9c-4255-9b6b-c3e240215dba" );//String.valueOf(conceptId));//+"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+            jsonplan.put("value", "Drug delivery by project beyond");
+            jsonplan.put("obsDatetime", edate);//+"T06:08:25.000+0000"
+            jsonObservations.put(jsonplan);
+            //
+            JSONObject jsonVisit = new JSONObject();
+            jsonVisit.put("patient", puuid);//"60168b73-60f1-4044-9dc6-84fdcbc1962c");
+            jsonVisit.put("visitType", "d4ac2aa5-2899-42fb-b08a-d40161815b48");
+            jsonVisit.put("startDatetime", edate); //+"T06:08:25.000+0000"
+            jsonVisit.put("stopDatetime", edate); //+"T06:09:25.000+0000"
+
+            JSONArray jsonProviders = new JSONArray();
+            JSONObject jsonProvider = new JSONObject();
+            jsonProvider.put("provider", "pb6e31da-1359-11df-a1f1-0026b9348838"); //Super Users
+            jsonProvider.put("encounterRole", "a0b03050-c99b-11e0-9572-0800200c9a66");
+            jsonProviders.put(jsonProvider);
+
+            JSONObject jsonEncounter = new JSONObject();
+            jsonEncounter.put("encounterProviders", jsonProviders);
+            jsonEncounter.put("patient", puuid);//"60168b73-60f1-4044-9dc6-84fdcbc1962c");
+            jsonEncounter.put("encounterDatetime", edate); //+"T06:09:00.000+0000"
+            jsonEncounter.put("encounterType", "d34bad47-8219-4615-a28c-b7d7867cf1f4");// "987009c6-6f24-43f7-9640-c285d6553c63"); Drug Pickup
+            jsonEncounter.put("form", "66e02a21-345a-48cb-9334-ef1f4c17abaa"); //1447
+            jsonEncounter.put("location", luuid);
+            jsonEncounter.put("visit", jsonVisit);
+            jsonEncounter.put("obs", jsonObservations);
+            fvalues = fvalues+jsonEncounter.toString();
+
+            System.out.println(fvalues);
+
+            OkHttpClient client = new OkHttpClient();
+            MediaType mediaType = MediaType.parse("application/json");
+            RequestBody body = RequestBody.create(mediaType, fvalues);
+            Request request = new Request.Builder()
+                    .url(url + "/encounter")
+                    .method("POST", body)
+                    .addHeader("Authorization", "Basic " + authSynccode)
+                    .addHeader("Content-Type", "application/json")
+                    .build();
+            Response response = client.newCall(request).execute();
+
+            String resBody = response.request().toString();
+            int rescode = response.code();
+
+            System.out.println("Response ndo hii " + resBody);
+            ks.setInAMRS(1);
+            if(rescode==201) {
+                kashaDeliveriesService.save(ks);
+            }
+        }
+    }
+    // END Post to AMRS Deliveries
 
     //Share live Data to Pendulum
     @Scheduled(cron = "0 0,59 * * * *") // 30 minutes

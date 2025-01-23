@@ -52,6 +52,337 @@ public class AfyastatController {
 
     @Autowired
     private AfyastatErrorsService afyastatErrorsService;
+
+    @RequestMapping(value = "/500", method = RequestMethod.GET)
+    public void processencounters( ) throws IOException, JSONException, SQLException, ParseException {
+        // if (session.getAttribute("user") != null) {
+        //    ModelAndView modelAndView = new ModelAndView();
+        String discripter = "";
+        // HttpSession session = new ;
+        String originalInput = openmrs_username+":"+openmrs_password;
+        String authcode = Base64.getEncoder().encodeToString(originalInput.getBytes());
+
+        OkHttpClient sessionclient = new OkHttpClient();
+        Request sessionrequest = new Request.Builder()
+                .url( url+"/session")
+                .method("GET", null)
+                .addHeader("Authorization", "Basic " + authcode)
+                .build();
+        Response sessionresponse = sessionclient.newCall(sessionrequest).execute();
+
+        String json = sessionresponse.body().string();
+        // System.out.println("Session "+json);
+      /*  JSONObject jsonObject = new JSONObject(json);
+        String sessionID = (String) jsonObject.get("sessionId");
+        String cookie="JSESSIONID="+sessionID; */
+        // session.setAttribute("cookie", cookie);
+
+        // List<AfyastatErrors> afyastatErrorsList = afyastatErrorsService.getByDiscriminatorAndResponsecode("json-encounter","500");
+        List<AfyastatErrors> afyastatErrorsList = afyastatErrorsService.getByDiscriminatorAndResponsecode("json-encounter","500");
+        int xxx = afyastatErrorsList.size();
+        for (int y = 0; y < xxx; y++) {
+            AfyastatErrors afyastatErrors = afyastatErrorsList.get(y);
+            JSONObject jsonPayload = new JSONObject(afyastatErrors.getPayload());
+            // String originalInput = openmrs_username + ":" + openmrs_password;
+            // String authcode = Base64.getEncoder().encodeToString(originalInput.getBytes());
+
+            if(afyastatErrors.getDiscriminator().equals("json-encounter")){
+                String xx =   jsonPayload.getJSONObject("observation").toString();
+                System.out.println(" Payload "+xx);
+                JSONArray jsonObservations = new JSONArray();
+                String edate="";
+                String dtime = jsonPayload.getJSONObject("encounter").getString("encounter.encounter_datetime");
+                SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+                SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd");
+                edate =sdf2.format(sdf.parse(dtime));
+
+                JSONObject jsonObs = new JSONObject(jsonPayload.getJSONObject("observation").toString());
+                JSONObject obsJsonObject = (JSONObject) jsonObs;
+                for (Iterator it = obsJsonObject.keys(); it.hasNext(); ) {
+                    String conceptQuestion = String.valueOf(it.next());
+                    Object valueObject = obsJsonObject.get(conceptQuestion);
+                    String rquotes = conceptQuestion.substring(1, conceptQuestion.length() - 1);
+                    String ovalues = valueObject.toString();
+                    String occupationConAns = handleEditObsValues(rquotes.replace("^", "_"));
+                    String[] ObsQuestion = occupationConAns.split("_");
+                    String values="";
+                    //  String puuid = jsonPayload.getJSONObject("patient").getString("patient.uuid");
+                    String cuuid = jsonPayload.getJSONObject("patient").getString("patient.uuid");
+                    String puuid = getpersonuuid(cuuid);
+                    String obvaluesAns = ovalues.replace("^", "_");
+                    String[] ObsValues = obvaluesAns.split("_");
+
+                    if(ObsValues.length>1){
+                        values = ObsValues[1].toString();
+                    }else{
+                        values= ObsValues[0].toString();
+                    }
+                    if (ObsQuestion.length >0){
+                        try{
+                            int conceptId = Integer.parseInt(ObsQuestion[0]);
+                            if(obvaluesAns.contains("{")){
+                                //Obs Set
+                                // System.out.println("Parentkey delimiter : "+ conceptId +" Parentvalue { } "+valueObject.toString() +"size "+ObsValues.length+" obvaluesAns "+obvaluesAns +" fvalues iko na { } "+values ); //+" value "+ObsValues[1].toString()
+                                JSONObject jsonObsSet = new JSONObject(obvaluesAns);
+                                String parentuuid="";
+                                JSONArray jsonchildObservation = new JSONArray();
+
+
+                                for (Iterator itset = jsonObsSet.keys(); itset.hasNext(); ) {
+                                    String conceptSetQuestion = String.valueOf(itset.next());
+                                    // System.out.println("Set concempt "+ conceptSetQuestion);
+                                    Object valueSetObject = jsonObsSet.get(conceptSetQuestion);
+                                    String rsetquotes = conceptSetQuestion.substring(1, conceptSetQuestion.length() - 1);
+                                    String obsSetConAns = handleEditObsValues(rsetquotes.replace("^", "_"));
+                                    String[] ObsSetQuestion = obsSetConAns.split("_");
+                                    String obsetvaluesAns = valueSetObject.toString();
+                                    String[] ObsSetValues = obsetvaluesAns.split("_");
+                                    String setvalues="";
+                                    if(ObsSetValues.length>1){
+                                        setvalues = ObsSetValues[1].toString();
+                                    }else{
+                                        setvalues= ObsSetValues[0].toString();
+                                    }
+                                    if (ObsSetQuestion.length >0){
+                                        int conceptsetId = Integer.parseInt(ObsSetQuestion[0]);
+                                        String conceptuuid =getconceptuuid(String.valueOf(conceptsetId))[0];
+                                        String dtype =getconceptuuid(String.valueOf(conceptsetId))[1];
+                                        parentuuid =getconceptuuid(String.valueOf(conceptId))[0];
+                                        //    System.out.println("SetParentkey delimiter : "+ conceptsetId +" SetParentvalue "+valueSetObject.toString() +" Setsize "+ObsSetValues.length+" SetobvaluesAns "+obsetvaluesAns +" Setfvalues "+setvalues );
+                                        System.out.println("Parent concept "+conceptId +"SetParentkey delimiter : "+ conceptsetId +" Setfvalues "+setvalues +" dtype "+dtype);
+
+                                        JSONObject jsonObservation = new JSONObject();
+                                        jsonObservation.put("person",puuid);//"60168b73-60f1-4044-9dc6-84fdcbc1962c");
+                                        jsonObservation.put("concept",conceptuuid);///String.valueOf(conceptsetId));
+
+                                        String value ="";
+                                        int Numericvalue=0;
+                                        boolean boovalu;
+                                        if(dtype.equals("2")){
+                                            value =getconceptuuid(setvalues)[0];
+                                            jsonObservation.put("value", value);
+                                        }else if(dtype.equals("1")){
+                                            if(values.equals("")){
+                                                Numericvalue=0;
+                                            }else{
+                                                Numericvalue = Integer.parseInt(values);
+                                            }
+
+                                            jsonObservation.put("value", Numericvalue);
+                                        }
+                                        else if(dtype.equals("3") && values.equals("")){
+                                            value="None";
+                                            jsonObservation.put("value", value);
+                                        }
+                                        else{
+                                            value = setvalues;
+                                            jsonObservation.put("value", value);
+                                        }
+                                        //  JSONObject jsonObservation = new JSONObject();
+                                        //  jsonObservation.put("person",puuid);//"60168b73-60f1-4044-9dc6-84fdcbc1962c");
+                                        //  jsonObservation.put("concept",conceptuuid);///String.valueOf(conceptsetId));
+                                        //  jsonObservation.put("value", value);
+                                        jsonObservation.put("obsDatetime",edate );
+                                        if(conceptuuid.equals("a8aac5fc-1350-11df-a1f1-0026b9348838")||conceptuuid.equals("a8aab45e-1350-11df-a1f1-0026b9348838")||conceptuuid.equals("a89ff438-1350-11df-a1f1-0026b9348838")|| conceptuuid.equals("a89ce69e-1350-11df-a1f1-0026b9348838")){
+
+                                        }else {
+                                            jsonchildObservation.put(jsonObservation);
+                                        }
+
+                                    }
+                                }
+                                // Add ObsGroping here
+                                JSONObject jsonObservation = new JSONObject();
+                                // jsonObservation.put("person","60168b73-60f1-4044-9dc6-84fdcbc1962c");
+                                jsonObservation.put("concept",parentuuid);///String.valueOf(conceptsetId));
+                                jsonObservation.put("groupMembers", jsonchildObservation);
+                                jsonObservations.put(jsonObservation);
+
+                                //End of Obs Set
+                            }else{
+                                //System.out.println("Parentkey delimiter : "+ conceptId +" Parentvalue "+valueObject.toString() +" size "+ObsValues.length+" obvaluesAns "+obvaluesAns +" fvalues "+values );
+                                //    select uuid from concept where concept_id= 11838
+                                String conceptuuid =getconceptuuid(String.valueOf(conceptId))[0];
+                                String dtype =getconceptuuid(String.valueOf(conceptId))[1];
+                                System.out.println("Parent key delimiter : "+ conceptId +" fvalues "+values +" dtype "+dtype );
+
+                                JSONObject jsonObservation = new JSONObject();
+                                jsonObservation.put("person",puuid);//"60168b73-60f1-4044-9dc6-84fdcbc1962c");
+                                jsonObservation.put("concept",conceptuuid);//String.valueOf(conceptId));//+"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+
+                                String value ="";
+                                int Numericvalue=0;
+                                Boolean boolenvalue;
+                                if(dtype.equals("2")){
+                                    value =getconceptuuid(values)[0];
+                                    jsonObservation.put("value", value);
+
+                                }
+                                else if(dtype.equals("1")){
+                                    if(values.equals("")){
+                                        Numericvalue=0;
+                                    }else{
+                                        Numericvalue = Integer.parseInt(values);
+                                    }
+
+                                    jsonObservation.put("value", Numericvalue);
+                                }
+                                else if(dtype.equals("3") && values.equals("")){
+                                    value="None";
+                                    jsonObservation.put("value", value);
+
+                                }else if(dtype.equals("10")){
+                                    boolenvalue =Boolean.TRUE;
+                                    if(values.equals("1")) {
+                                        boolenvalue =Boolean.TRUE;
+                                        value = getconceptuuid("1065")[0];
+                                    }else{
+                                        boolenvalue =Boolean.FALSE;
+                                        value = getconceptuuid("1066")[0];
+                                    }
+                                    jsonObservation.put("value", boolenvalue);
+
+
+                                }
+                                else if(conceptuuid.equals("64807fb6-0ca3-4def-a62a-2d5f66c4328a") && values.contains("")){
+                                    value =edate;
+                                    jsonObservation.put("value", value);
+
+                                }
+                                else{
+                                    value = values;
+                                    jsonObservation.put("value", value);
+
+                                }
+                                // JSONObject jsonObservation = new JSONObject();
+                                // jsonObservation.put("person",puuid);//"60168b73-60f1-4044-9dc6-84fdcbc1962c");
+                                // jsonObservation.put("concept",conceptuuid);//String.valueOf(conceptId));//+"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                // jsonObservation.put("value", value);
+                                jsonObservation.put("obsDatetime",edate );//+"T06:08:25.000+0000"
+                                if(conceptuuid.equals("a8aac5fc-1350-11df-a1f1-0026b9348838")||conceptuuid.equals("a8aab45e-1350-11df-a1f1-0026b9348838") || conceptuuid.equals("a89ff438-1350-11df-a1f1-0026b9348838")||conceptuuid.equals("a8a710ba-1350-11df-a1f1-0026b9348838")|| conceptuuid.equals("a8aafc70-1350-11df-a1f1-0026b9348838")|| conceptuuid.equals("a89ce69e-1350-11df-a1f1-0026b9348838")){
+
+                                }else {
+                                    jsonObservations.put(jsonObservation);
+                                }
+
+                            }
+                        } catch (Exception ex){
+                            // System.out.println("key delimiter NaN : "+ ex.getMessage() +" kdkdkdk "+ObsQuestion[0]);
+                        }
+                    }else{
+                        //int conceptId = Integer.parseInt(ObsQuestion[0]);
+                        //System.out.println("key delimiter : "+ conceptId );
+                    }
+                }
+                //Encounter Details
+                String euuid = jsonPayload.getJSONObject("encounter").getString("encounter.setup_config_uuid");
+                String location = jsonPayload.getJSONObject("encounter").getString("encounter.location_id");
+                String provider = jsonPayload.getJSONObject("encounter").getString("encounter.provider_id_select");
+                String form = jsonPayload.getJSONObject("encounter").getString("encounter.form_uuid");
+                String cuuid = jsonPayload.getJSONObject("patient").getString("patient.uuid");
+                String puuid = getpersonuuid(cuuid);
+                Connection con = DriverManager.getConnection(server, username, password);
+                String luuid="";
+                String pruuid="";
+
+                int x = 0;
+                Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
+                        ResultSet.CONCUR_READ_ONLY);
+                ResultSet rs = stmt.executeQuery("select uuid from afyastat.location where location_id="+ location+"");
+                rs.last();
+                x = rs.getRow();
+                rs.beforeFirst();
+                while (rs.next()) {
+                    luuid = rs.getString(1).toString();
+                }
+                ResultSet prs = stmt.executeQuery("select uuid from afyastat.provider where identifier="+ provider+"");
+                prs.last();
+                x = prs.getRow();
+                prs.beforeFirst();
+                while (prs.next()) {
+                    pruuid = prs.getString(1).toString();
+                }
+
+                con.close();
+
+                JSONObject jsonVisit = new JSONObject();
+                jsonVisit.put("patient",puuid);//"60168b73-60f1-4044-9dc6-84fdcbc1962c");
+                jsonVisit.put("visitType","9865c08a-97a4-4571-b873-dd422583b3a7");
+                jsonVisit.put("startDatetime",edate); //+"T06:08:25.000+0000"
+                jsonVisit.put("stopDatetime",edate); //+"T06:09:25.000+0000"
+
+
+                JSONArray jsonProviders = new JSONArray();
+                JSONObject jsonProvider = new JSONObject();
+                jsonProvider.put("provider", pruuid);
+                jsonProvider.put("encounterRole", "a0b03050-c99b-11e0-9572-0800200c9a66");
+                jsonProviders.put(jsonProvider);
+
+                JSONObject jsonEncounter = new JSONObject();
+                jsonEncounter.put("encounterProviders",jsonProviders);
+                jsonEncounter.put("patient",puuid);//"60168b73-60f1-4044-9dc6-84fdcbc1962c");
+                jsonEncounter.put("encounterDatetime",edate); //+"T06:09:00.000+0000"
+                jsonEncounter.put("encounterType",euuid);
+                jsonEncounter.put("form",form);
+                jsonEncounter.put("location",luuid);
+                jsonEncounter.put("visit",jsonVisit);
+                jsonEncounter.put("obs",jsonObservations);
+
+                // System.out.println("Patient "+ puuid+" Encounter uuid "+euuid+" Etime "+ edate+" location "+luuid+" provider "+pruuid+" form "+form);
+                //  System.out.println("Index "+ y + " Of "+xxx + " Payload "+ jsonEncounter.toString());
+                OkHttpClient client = new OkHttpClient();
+                MediaType mediaType = MediaType.parse("application/json");
+                RequestBody body = RequestBody.create(mediaType, jsonEncounter.toString());
+                Request request = new Request.Builder()
+                        .url(url + "/encounter")
+                        .method("POST", body)
+                        .addHeader("Authorization", "Basic " + authcode)
+                        .addHeader("Content-Type", "application/json")
+                        .build();
+                Response response = client.newCall(request).execute();
+
+                String resBody = response.request().toString();
+                int rescode = response.code();
+
+
+                   /* OkHttpClient client = new OkHttpClient();
+                    MediaType mediaType = MediaType.parse("application/json");
+                    RequestBody body = RequestBody.create(mediaType,jsonEncounter.toString());
+                    Request request = new Request.Builder()
+                            .url( url +"encounter")
+                            .method("POST", body)
+                            .addHeader("Authorization", "Basic " + authcode)
+                            .addHeader("Content-Type", "application/json")
+                            .addHeader("Cookie", cookie)// (String) session.getAttribute("cookie"))
+                            .build();
+                    Response response = client.newCall(request).execute(); */
+                String bb = response.body().string();
+                int code = response.code();
+                String status ="";
+                System.out.println("Response Code Imesave "+code);
+                System.out.println("Payload "+jsonEncounter.toString());
+                if(code==400){
+                    status = "Record Exists";
+                }else{
+                    status = "Processed Successfully";
+                }
+                afyastatErrors.setStatus(status);
+                afyastatErrors.setResponsecode(String.valueOf(code));
+                afyastatErrorsService.save(afyastatErrors);
+
+                System.out.println(bb);
+
+            }
+
+
+        }
+        List<AfyastatErrors> afyastatErrorsListt = afyastatErrorsService.getErrors("json-encounter");
+        // modelAndView.addObject("errors", afyastatErrorsListt);
+        // modelAndView.setViewName("pm/afyastatnew");
+        // return modelAndView;
+
+    }
+
     @RequestMapping(value = "/all_errorqueue", method = RequestMethod.GET)
     public String encounters(HttpSession session) throws IOException, JSONException, SQLException {
         if (session.getAttribute("user") != null) {

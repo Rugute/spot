@@ -6,13 +6,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "vls_orders")
+@Table(name = "vls_orders_new")
 public class VlsOrders {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -48,8 +49,15 @@ public class VlsOrders {
 
     @Column(name = "status")
     private String status;
+
     @Column(name = "status_code")
     private int statusCode;
+
+    @Column(name = "date_procossed")
+    private Date dateProcossed;
+
+    @Column(name = "date_modified")
+    private Date dateModified;
 
     public int getId() {
         return id;
@@ -137,5 +145,29 @@ public class VlsOrders {
 
     public void setStatusCode(int statusCode) {
         this.statusCode = statusCode;
+    }
+
+    public String getCcc() {
+        return ccc;
+    }
+
+    public void setCcc(String ccc) {
+        this.ccc = ccc;
+    }
+
+    public Date getDateProcossed() {
+        return dateProcossed;
+    }
+
+    public void setDateProcossed(Date dateProcossed) {
+        this.dateProcossed = dateProcossed;
+    }
+
+    public Date getDateModified() {
+        return dateModified;
+    }
+
+    public void setDateModified(Date dateModified) {
+        this.dateModified = dateModified;
     }
 }
